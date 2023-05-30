@@ -10,11 +10,32 @@ data "azurerm_subnet" "aks_subnet" {
   resource_group_name  = var.spoke_resource_group_name
 }
 
-module "ssh-key" {
-  source         = "../ssh-key"
-  public_ssh_key = var.public_ssh_key == "" ? "" : var.public_ssh_key
+# module "ssh-key" {
+#   source         = "../ssh-key"
+#   public_ssh_key = var.public_ssh_key == "" ? "" : var.public_ssh_key
+# }
+
+
+resource "tls_private_key" "ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
 }
 
+resource "local_file" "private_key" {
+  count    = var.public_ssh_key == "" ? 1 : 0
+  content  = tls_private_key.ssh.private_key_pem
+  filename = "./private_ssh_key"
+}
+
+# output "public_ssh_key" {
+#   # Only output a generated ssh public key
+#   value = var.public_ssh_key != "" ? "" : tls_private_key.ssh.public_key_openssh
+# }
+
+variable "public_ssh_key" {
+  description = "An ssh key set in the main variables of the terraform-azurerm-aks module"
+  default     = ""
+  }
 
 
 resource "azurerm_kubernetes_cluster" "aks" {
@@ -55,7 +76,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   linux_profile {
     admin_username      = "azureadminuser"
     ssh_key {
-        key_data        = replace(var.public_ssh_key == "" ? module.ssh-key.public_ssh_key : var.public_ssh_key, "\n", "")
+        key_data        = replace(var.public_ssh_key == "" ? tls_private_key.ssh.public_key_openssh : var.public_ssh_key, "\n", "")
     }      
   }
 
