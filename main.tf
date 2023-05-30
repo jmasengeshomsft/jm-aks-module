@@ -10,22 +10,16 @@ data "azurerm_subnet" "aks_subnet" {
   resource_group_name  = var.vnet_resource_group_name
 }
 
-# module "ssh-key" {
-#   source         = "../ssh-key"
-#   public_ssh_key = var.public_ssh_key == "" ? "" : var.public_ssh_key
+# resource "tls_private_key" "ssh" {
+#   algorithm = "RSA"
+#   rsa_bits  = 2048
 # }
 
-
-resource "tls_private_key" "ssh" {
-  algorithm = "RSA"
-  rsa_bits  = 2048
-}
-
-resource "local_file" "private_key" {
-  count    = var.public_ssh_key == "" ? 1 : 0
-  content  = tls_private_key.ssh.private_key_pem
-  filename = "./private_ssh_key"
-}
+# resource "local_file" "private_key" {
+#   count    = var.public_ssh_key == "" ? 1 : 0
+#   content  = tls_private_key.ssh.private_key_pem
+#   filename = "./private_ssh_key"
+# }
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.aks_cluster_name
@@ -62,12 +56,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     }
   }
 
-  linux_profile {
-    admin_username      = "azureadminuser"
-    ssh_key {
-        key_data        = replace(var.public_ssh_key == "" ? tls_private_key.ssh.public_key_openssh : var.public_ssh_key, "\n", "")
-    }      
-  }
+  # linux_profile {
+  #   admin_username      = "azureadminuser"
+  #   ssh_key {
+  #       key_data        = replace(var.public_ssh_key == "" ? tls_private_key.ssh.public_key_openssh : var.public_ssh_key, "\n", "")
+  #   }      
+  # }
 
   identity {
     type         = "SystemAssigned"
