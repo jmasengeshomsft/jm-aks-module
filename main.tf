@@ -27,17 +27,6 @@ resource "local_file" "private_key" {
   filename = "./private_ssh_key"
 }
 
-# output "public_ssh_key" {
-#   # Only output a generated ssh public key
-#   value = var.public_ssh_key != "" ? "" : tls_private_key.ssh.public_key_openssh
-# }
-
-variable "public_ssh_key" {
-  description = "An ssh key set in the main variables of the terraform-azurerm-aks module"
-  default     = ""
-  }
-
-
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.aks_cluster_name
   location            = var.location
