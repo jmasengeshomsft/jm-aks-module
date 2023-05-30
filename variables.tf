@@ -14,6 +14,10 @@ variable "vnet_resource_group_name" {
     description = "The name of the vnet"
 }
 
+variable "aks_subnet_name" {
+    description = "The name of the subnet"
+}
+
 # variable "aks_subnet_id" {
 #     description = "The id of the subnet to attach to the udr"
 # }
@@ -30,6 +34,10 @@ variable "linux_admin_user" {
 
 variable "aks_cluster_name" {
     description = "The name of the cluster"
+}
+
+variable "workspace_name" {
+    description = "The name of the law"
 }
 
 # variable "private_dns_zone_id" {
