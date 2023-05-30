@@ -14,9 +14,9 @@ variable "vnet_resource_group_name" {
     description = "The name of the vnet"
 }
 
-variable "aks_subnet_id" {
-    description = "The id of the subnet to attach to the udr"
-}
+# variable "aks_subnet_id" {
+#     description = "The id of the subnet to attach to the udr"
+# }
 
 variable "public_ssh_key" {
   description = "A custom ssh key to control access to the AKS cluster"
@@ -55,14 +55,14 @@ variable "workload_node_count" {
     default     = 2
 }
 
-variable "workload_linux_subnet_id" {
-    description = "The subnet for linux workload pods"
-}
+# variable "workload_linux_subnet_id" {
+#     description = "The subnet for linux workload pods"
+# }
 
-variable "azurerm_log_analytics_workspace_id" {
-    description = "The id of the log analytics woskpace"
+# variable "azurerm_log_analytics_workspace_id" {
+#     description = "The id of the log analytics woskpace"
 
-}
+# }
 
 variable "default_pool_max_pods" {
     description = "The number of pods on the default node pool"
@@ -117,24 +117,15 @@ variable "network_policy" {
     default     = "calico"
 }
 
-variable "docker_bridge_cidr" {
-    description = "Docker Address Space"
-    # default     = "172.17.0.1/16"
-}
-
-variable "pod_cidr" {
-    description = "Pod Address Space"
-    # default     = "10.244.0.0/16"
-}
 
 variable "service_cidr" {
     description = "Service Address Space"
-    # default     = "10.240.0.0/16"
+    default     = "10.240.0.0/16"
 }
 
 variable "dns_service_ip" {
     description = "Service Address Space"
-    # default     = "10.240.0.10"
+    default     = "10.240.0.10"
 }
 
 variable "outbound_type" {
@@ -142,9 +133,9 @@ variable "outbound_type" {
     default     = "userDefinedRouting"
 }
 
-variable "tenant_id" {
-    description = "Tenant aad"
-}
+# variable "tenant_id" {
+#     description = "Tenant aad"
+# }
 
 variable "azure_aad_admin_group_id" {
     description = "The default aad group"

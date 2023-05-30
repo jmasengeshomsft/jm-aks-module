@@ -1,13 +1,13 @@
 
 data "azurerm_log_analytics_workspace" "logs" {
   name                = var.workspace_name
-  resource_group_name = var.spoke_resource_group_name
+  resource_group_name = var.resource_group_name
 }
 
 data "azurerm_subnet" "aks_subnet" {
   name                 = var.aks_subnet_name
-  virtual_network_name = var.spoke_vnet_name
-  resource_group_name  = var.spoke_resource_group_name
+  virtual_network_name = var.virtual_network_name
+  resource_group_name  = var.vnet_resource_group_name
 }
 
 # module "ssh-key" {
