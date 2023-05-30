@@ -1,3 +1,15 @@
+
+data "azurerm_log_analytics_workspace" "logs" {
+  name                = var.workspace_name
+  resource_group_name = var.spoke_resource_group_name
+}
+
+data "azurerm_subnet" "aks_subnet" {
+  name                 = var.aks_subnet_name
+  virtual_network_name = var.spoke_vnet_name
+  resource_group_name  = var.spoke_resource_group_name
+}
+
 module "ssh-key" {
   source         = "../ssh-key"
   public_ssh_key = var.public_ssh_key == "" ? "" : var.public_ssh_key
@@ -26,13 +38,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
     # node_count              = var.default_node_count
     vm_size                 = var.default_vm_size
     type                    = var.node_pool_type 
-    tags                    = var.tags
+    # tags                    = var.tags
     max_pods                = var.default_pool_max_pods
-    vnet_subnet_id          = var.aks_subnet_id
+    vnet_subnet_id          = data.azurerm_subnet.aks_subnet.id
     # pod_subnet_id           = var.workload_linux_subnet_id
     enable_host_encryption  = false
     enable_auto_scaling     = true
-    min_count               = var.default_node_count
+    min_count               = 2
     max_count               = 10
     zones                   = ["1","2","3"]
     node_labels             = {
@@ -41,7 +53,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   linux_profile {
-    admin_username      = var.linux_admin_user
+    admin_username      = "azureadminuser"
     ssh_key {
         key_data        = replace(var.public_ssh_key == "" ? module.ssh-key.public_ssh_key : var.public_ssh_key, "\n", "")
     }      
@@ -52,7 +64,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   oms_agent  {
-    log_analytics_workspace_id = var.azurerm_log_analytics_workspace_id
+    log_analytics_workspace_id = data.azurerm_log_analytics_workspace.logs.id
   }
 
   key_vault_secrets_provider {
@@ -71,41 +83,37 @@ resource "azurerm_kubernetes_cluster" "aks" {
   
   network_profile {
       network_plugin      = var.network_plugin
-      # docker_bridge_cidr  = var.docker_bridge_cidr
-      # pod_cidr            = var.pod_cidr
-      service_cidr        = var.service_cidr
-      dns_service_ip      = var.dns_service_ip
-      outbound_type       = var.outbound_type
-      network_policy      = var.network_policy
+      service_cidr        = "10.240.0.0/16"
+      dns_service_ip      =  "10.240.0.10"
+      outbound_type       = "loadBalancer"
+      network_policy      = "calico"
   }
 
   storage_profile {
     blob_driver_enabled = true
-    # disk_driver_version = "v2"
   }
 
-  tags = var.tags
+  # tags = var.tags
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "workload_linux" {
-    name                    = "lightapps"
-    kubernetes_cluster_id   = azurerm_kubernetes_cluster.aks.id
-    # node_count              = var.workload_node_count
-    vm_size                 = var.workload_vm_size
-    tags                    = var.tags
-    max_pods                = var.default_pool_max_pods
-    vnet_subnet_id          = var.aks_subnet_id
-    # pod_subnet_id         = var.workload_linux_subnet_id
-    enable_host_encryption  = false
-    enable_auto_scaling     = true
-    os_type                 = var.workload_os_type
-    min_count               = var.workload_node_count
-    max_count               = 10
-    zones                   = ["1","2","3"]
-    node_labels = {
-      workload_type = "application_linux"
-    }
-  }
+# resource "azurerm_kubernetes_cluster_node_pool" "workload_linux" {
+#     name                    = "lightapps"
+#     kubernetes_cluster_id   = azurerm_kubernetes_cluster.aks.id
+#     # node_count              = var.workload_node_count
+#     vm_size                 = var.workload_vm_size
+#     tags                    = var.tags
+#     max_pods                = var.default_pool_max_pods
+#     vnet_subnet_id          = var.aks_subnet_id
+#     enable_host_encryption  = false
+#     enable_auto_scaling     = true
+#     os_type                 = var.workload_os_type
+#     min_count               = var.workload_node_count
+#     max_count               = 10
+#     zones                   = ["1","2","3"]
+#     node_labels = {
+#       workload_type = "application_linux"
+#     }
+#   }
 
 
 # resource "azurerm_monitor_diagnostic_setting" "aks-logging" {
